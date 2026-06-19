@@ -1,0 +1,5 @@
+variant: late_2d
+fusion: late              # decision-level: two detectors -> IoU merge + NMS
+output_space: 2d
+merge_iou_thresh: 0.5
+merge_conf_mode: mean     # mean | max

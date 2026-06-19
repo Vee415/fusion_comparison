@@ -1,0 +1,1 @@
+"""Variant A: early-2D (data-level) fusion."""

@@ -1,0 +1,1 @@
+"""Variant C: late-2D (decision-level) fusion."""

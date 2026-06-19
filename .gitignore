@@ -1,0 +1,24 @@
+# Data (12 GB KITTI + raw) -- never commit
+data/kitti/
+data/*.zip
+*.bin
+*.kitti
+
+# Training artifacts
+checkpoints/
+*.pt
+onnx/
+*.onnx
+benchmark_results.csv
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+.pytest_cache/
+
+# Env
+.env
+venv/
+.venv/

@@ -1,0 +1,1 @@
+"""Variant D: 3D BEV feature fusion (lift-splat cam + PointPillars lidar)."""

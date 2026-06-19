@@ -1,0 +1,1 @@
+"""Training: one trainer for all variants + losses."""

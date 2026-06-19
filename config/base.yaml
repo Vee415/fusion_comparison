@@ -1,0 +1,40 @@
+# Shared across all variants. Only fusion-specific deltas go in the variant yamls.
+seed: 0
+dataset: kitti            # kitti | synthetic
+data_root: data/kitti
+image_size: [384, 1280]   # [H, W] — KITTI aspect
+num_classes: 1
+classes: ["Car"]
+
+lidar:
+  max_points: 15000       # subsample per frame to bound memory
+
+bev:
+  range_m: 32.0           # +/- meters from ego
+  res_m: 0.2              # cell size -> 320x320 grid (D shrinks this)
+
+backbone: resnet18        # shared
+fusion_channels: 256      # shared fused-feature channel count
+lidar_feat_channels: 32   # mid-2D lidar image-grid feature dim
+pillar_feat_channels: 64  # 3D PointPillars per-pillar feature dim
+
+# Detection head
+stride: 16                # 2D feature level (384/16=24, 1280/16=80)
+
+# Training
+epochs: 60
+batch_size: 2
+lr: 0.001
+weight_decay: 0.0001
+amp: true
+workers: 2
+
+# Robustness
+robustness:
+  cam_blind: true
+  lidar_blind: true
+
+# Cost / latency benchmark
+benchmark:
+  warmup: 20
+  iters: 100

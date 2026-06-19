@@ -1,0 +1,4 @@
+variant: mid_2d
+fusion: mid                # feature-level: concat F_cam + F_lid (image-grid aligned) + 1x1 conv
+output_space: 2d
+use_cross_attention: false # optional; keep false for clean export

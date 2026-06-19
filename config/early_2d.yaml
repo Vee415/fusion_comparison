@@ -1,0 +1,5 @@
+variant: early_2d
+fusion: early              # data-level: depth as a 4th image channel
+output_space: 2d
+extra_input_channels: 1   # +1 depth channel -> 4-channel input
+early_depth_mode: depth     # depth | hha (hha is optional, not implemented in v1)

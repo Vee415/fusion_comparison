@@ -1,0 +1,1 @@
+"""Shared building blocks: sensors, backbones, geometry."""

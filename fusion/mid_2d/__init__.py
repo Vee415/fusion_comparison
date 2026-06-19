@@ -1,0 +1,1 @@
+"""Variant B: mid-2D (feature-level) fusion."""

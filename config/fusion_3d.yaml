@@ -1,0 +1,11 @@
+variant: fusion_3d
+fusion: 3d                # BEV feature fusion: lift-splat (cam) + pillars (lidar) fused in BEV
+output_space: 3d
+bev:
+  res_m: 0.4             # coarser cells for the 3D variant (160x160) -> laptop-friendly
+  range_m: 32.0
+lift:
+  depth_bins: 16         # small lift-splat depth bins (simplified LSS)
+  depth_max_m: 40.0
+head_3d:
+  predict_velocity: false # skip velocity for v1 simplicity

@@ -1,0 +1,1 @@
+"""Tests (pytest). Run: python -m pytest tests/ -q"""
