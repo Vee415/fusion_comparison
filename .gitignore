@@ -22,3 +22,8 @@ __pycache__/
 .env
 venv/
 .venv/
+
+# Personal notes / drafts (local only, not for the remote)
+fusion*.md
+sess*.md
+.zcode/

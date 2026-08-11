@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning Fusion — From Your Own Code</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --ink:#e6e6e6; --muted:#9aa3b2;
+    --accent:#7cc4ff; --accent2:#8be9b6; --warn:#ffd479; --code-bg:#0b0d12; --border:#2a2f3a;
+    --link:#7cc4ff;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.65; font-size:17px;
+  }
+  .wrap{max-width:900px; margin:0 auto; padding:0 24px 120px;}
+  header{
+    background:linear-gradient(180deg,#161a22,#0f1115); border-bottom:1px solid var(--border);
+    padding:42px 24px 28px; position:sticky; top:0; z-index:10; backdrop-filter:blur(6px);
+  }
+  header .inner{max-width:900px; margin:0 auto;}
+  h1{margin:0 0 6px; font-size:28px; letter-spacing:-0.02em;}
+  header p{margin:0; color:var(--muted); font-size:14px;}
+  h2{
+    margin:56px 0 14px; font-size:23px; color:#fff; border-bottom:1px solid var(--border);
+    padding-bottom:8px; scroll-margin-top:90px;
+  }
+  h3{margin:26px 0 8px; font-size:18px; color:var(--accent);}
+  h4{margin:20px 0 6px; font-size:15px; color:var(--accent2); text-transform:uppercase; letter-spacing:0.06em;}
+  p{margin:12px 0;}
+  ul,ol{margin:12px 0; padding-left:24px;}
+  li{margin:6px 0;}
+  code{font-family:"SF Mono",Menlo,Consolas,monospace; background:var(--code-bg); color:#cfe6ff;
+       padding:2px 6px; border-radius:4px; font-size:14px;}
+  pre{background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:16px;
+      overflow-x:auto; font-size:13.5px; line-height:1.5;}
+  pre code{background:none; padding:0; color:#d7e3ff;}
+  table{border-collapse:collapse; width:100%; margin:16px 0; font-size:15px;}
+  th,td{border:1px solid var(--border); padding:8px 12px; text-align:left; vertical-align:top;}
+  th{background:var(--panel2); color:#fff;}
+  tr:nth-child(even) td{background:var(--panel);}
+  blockquote{border-left:3px solid var(--accent); margin:14px 0; padding:8px 16px;
+            background:var(--panel); border-radius:0 6px 6px 0; color:#cfd6e2;}
+  a{color:var(--link); text-decoration:none;}
+  .pill{display:inline-block; background:var(--panel2); color:var(--accent2); border:1px solid var(--border);
+        padding:1px 8px; border-radius:10px; font-size:12px; margin-left:6px;}
+  .callout{background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:14px 18px; margin:18px 0;}
+  hr{border:none; border-top:1px solid var(--border); margin:40px 0;}
+
+  /* TOC */
+  nav.toc{background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:14px 18px; margin:24px 0;}
+  nav.toc h4{margin:0 0 8px; color:var(--muted);}
+  nav.toc ol{margin:0; padding-left:20px;}
+  nav.toc li{margin:3px 0;}
+
+  /* Self-test */
+  .q{background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:14px 18px; margin:12px 0;}
+  .q .qlabel{color:var(--warn); font-weight:600; font-size:14px;}
+  .q .qtext{margin:6px 0 0;}
+  button.reveal{margin-top:10px; background:var(--panel2); color:var(--ink); border:1px solid var(--border);
+               padding:6px 14px; border-radius:6px; cursor:pointer; font-size:13px;}
+  button.reveal:hover{border-color:var(--accent); color:var(--accent);}
+  .ans{display:none; margin-top:12px; padding:12px 16px; background:var(--panel2);
+       border-left:3px solid var(--accent2); border-radius:0 6px 6px 0; color:#cfe0d4;}
+  .ans.show{display:block;}
+  .test-controls{margin:18px 0;}
+  .test-controls button{margin-right:10px;}
+  .section-tag{color:var(--muted); font-size:13px; font-weight:normal;}
+  footer{color:var(--muted); font-size:13px; text-align:center; margin-top:60px;}
+  .kw{color:var(--accent2);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <h1>Learning Fusion <span style="color:var(--muted);font-weight:400;font-size:18px">— From Your Own Code</span></h1>
+    <p>Multi-modal sensor fusion, explained through the files you already wrote in <code>fusion/</code>.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="callout">
+    <strong>Purpose:</strong> teach multi-modal sensor fusion by reading what you <em>already built</em>,
+    not a textbook. Every concept below maps to a real file/function in this repo so you can open it,
+    see it, and explain it cold in an interview.<br><br>
+    <strong>How to use:</strong> read one section → open the linked file → confirm the code matches the
+    explanation → move on. When done, take the <a href="#selftest">Self-Test</a> <em>without</em> revealing
+    the answers. Re-take in 3 days, then again in a week.<br><br>
+    <strong>Your project in one sentence:</strong> a <em>benchmark</em> of four fusion strategies
+    (early-2D, mid-2D, late-2D, 3D-BEV) on camera + LiDAR, where <strong>everything is held fixed except
+    where/how the two sensors are fused</strong> — so the only thing you measure is the effect of the fusion strategy.
+  </div>
+
+  <nav class="toc">
+    <h4>Contents</h4>
+    <ol>
+      <li><a href="#s0">0 · Why fuse sensors at all?</a></li>
+      <li><a href="#s1">1 · Coordinate frames &amp; calibration</a></li>
+      <li><a href="#s2">2 · Projection — 3D LiDAR points to 2D pixels (and back)</a></li>
+      <li><a href="#s3">3 · The three fusion levels</a></li>
+      <li><a href="#s4">4 · Robustness — the real reason fusion beats single-sensor</a></li>
+      <li><a href="#s5">5 · BEV &amp; 3D fusion</a></li>
+      <li><a href="#s6">6 · The deploy story</a></li>
+      <li><a href="#s7">7 · Interview quick-reference (memorize seven)</a></li>
+      <li><a href="#selftest">★ Self-Test (19 questions)</a></li>
+    </ol>
+  </nav>
+
+  <!-- 0 -->
+  <h2 id="s0">0 · Why fuse sensors at all?</h2>
+  <p>A single sensor has hard failure modes:</p>
+  <ul>
+    <li><strong>Camera</strong> fails at night, in glare, in fog, and gives <strong>no distance</strong> — a pixel tells you nothing about how far an object is; that's lost the moment light hits the sensor.</li>
+    <li><strong>LiDAR</strong> gives precise 3D distance but no color/texture, is sparse far away, and can be fooled by dark/glass surfaces.</li>
+  </ul>
+  <p>Fusion's promise: each sensor covers the other's failure mode, so the combined detector is <strong>more accurate <em>and</em> more robust</strong> (degrades gracefully when one sensor drops out) than either alone. The whole project exists to <em>measure</em> that claim honestly.</p>
+  <blockquote><strong>The benchmark's single rule</strong> (from <code>fusion-benchmark-guide.md</code> §0): hold the sensor pair, dataset split, backbones (ResNet-18 everywhere), input resolution, epochs, and seed <strong>fixed</strong>. The only thing that varies across the four variants is <em>where and how</em> you fuse. "Fusion gain" = variant AP − best single-sensor baseline under the same constraints. That framing is what makes this a benchmark, not four demos.</blockquote>
+
+  <!-- 1 -->
+  <h2 id="s1">1 · Coordinate frames &amp; calibration <span class="section-tag">→ common/sensors/calibration.py</span></h2>
+  <p>This is the #1 thing reviewers care about and the #1 place new-grads hand-wave. Your repo treats it correctly.</p>
+
+  <h3>The frames</h3>
+  <p>KITTI uses three coordinate frames, and fusion = moving data between them:</p>
+  <pre><code>velo (LiDAR frame)  --Tr_velo_to_cam--&gt;  cam (unrectified)  --R0_rect--&gt;  cam (rectified)  --P2--&gt;  image (u,v,depth)</code></pre>
+  <ul>
+    <li><strong>velo</strong> = LiDAR's own frame (where points live when the sensor spits them out).</li>
+    <li><strong>cam (rectified)</strong> = the camera's frame after stereo rectification. This is the reference frame your code works in.</li>
+    <li><strong>image</strong> = 2D pixels <code>(u,v)</code> + a depth value.</li>
+  </ul>
+
+  <h3>The matrices (calib.py:12–23)</h3>
+  <p>A <code>Calib</code> object stores three matrices as homogeneous 4×4 so composition is just matmul:</p>
+  <ul>
+    <li><strong><code>V2C</code></strong> = <code>Tr_velo_to_cam</code> (3×4) — LiDAR → camera.</li>
+    <li><strong><code>R0</code></strong> = <code>R0_rect</code> (3×3) — rectify the camera frame.</li>
+    <li><strong><code>P</code></strong> = <code>P2</code> (3×4) — camera intrinsics (focal length fx,fy, principal point cx,cy).</li>
+  </ul>
+
+  <h3>The convention your code asserts (look at every docstring)</h3>
+  <blockquote>cam frame: x right, y down, z forward. BEV grid: dim0(r)=z (forward), dim1(c)=x (right), centered at ego.</blockquote>
+  <p>This is KITTI-specific and <em>different</em> from the more common "x forward, y left, z up" you'll see in ROS/nuScenes. Your code asserts it and assumes points are already in cam frame for the 3D branch — so always convert velo→cam first (<code>lidar_encoder.py</code> does this at lines 52/92).</p>
+
+  <h3>Why this matters for the interview</h3>
+  <p>If you can't name the frames and the matrix chain, a sensing interviewer will assume the rest is copy-paste. If you can say "LiDAR points live in the velo frame; I compose <code>R0 @ V2C</code> to bring them into the rectified camera frame, then <code>P2</code> to project to pixels, keeping depth as the third coordinate" — that's the whole game.</p>
+
+  <!-- 2 -->
+  <h2 id="s2">2 · Projection — 3D LiDAR points to 2D pixels (and back) <span class="section-tag">→ common/sensors/projection.py</span></h2>
+  <p>This is the bridge that makes all 2D fusion possible.</p>
+
+  <h3>Forward: LiDAR point → pixel (projection.py:59–76)</h3>
+  <pre><code>h = [x, y, z, 1]                          # homogeneous velo point
+cam = (R0 @ V2C @ h.T).T[:, :3]           # velo -&gt; rectified cam (3D still)
+img = (P @ [cam, 1].T).T[:, :3]           # apply intrinsics -&gt; (X', Y', Z') where Z' = depth
+depth = img[:, 2]                         # the forward distance survives as depth
+uv = img[:, :2] / depth                   # perspective divide: pixel = image_xyz / depth</code></pre>
+  <p>Key insight: projection = <strong>matrix multiply, then divide by depth (the "perspective divide")</strong>. <code>depth</code> is not a separate measurement — it falls out of the <code>Z</code> coordinate after the intrinsics. <code>valid</code> keeps only points in front of the camera (<code>depth &gt; 0</code>) and inside the image bounds.</p>
+
+  <h3>Rendering depth to an image (projection.py:79–93)</h3>
+  <p>Project every point, write its depth into the pixel it lands on. Tricky detail: multiple LiDAR points can hit the same pixel. Your code sorts <strong>far-first</strong> so the <strong>nearest point overwrites</strong> — the closest surface wins, which is what you want for a depth map.</p>
+
+  <h3>Back-projection: pixel + depth → 3D point (calibration.py:83–91, used by lift-splat)</h3>
+  <p>This is the reverse trick and the heart of the 3D camera branch:</p>
+  <pre><code>x = (u - cx) * depth / fx
+y = (v - cy) * depth / fy
+z = depth</code></pre>
+  <p>A single pixel has no depth, so it can't become a 3D point. But a <strong>pixel + a predicted depth</strong> <em>can</em>. This is exactly what lift-splat-shoot does (Section 5): the camera branch <em>predicts</em> a depth distribution for every pixel, then back-projects each pixel to 3D using that depth.</p>
+
+  <h3>The 3-channel LiDAR image (projection.py:96–112)</h3>
+  <p>For the late-fusion LiDAR-only detector, you render LiDAR as a fake 3-channel image <code>[depth, height(z), intensity]</code>. This is how you turn sparse 3D points into something a normal 2D CNN can eat — you "camera-ify" the LiDAR.</p>
+
+  <!-- 3 -->
+  <h2 id="s3">3 · The three fusion levels <span class="section-tag">→ the core concept, mapped to your three model files</span></h2>
+  <p>This is <strong>the</strong> thing every fusion JD asks about. Three levels, defined by <em>where in the pipeline</em> you combine the sensors:</p>
+  <table>
+    <tr><th>Level</th><th>Where you fuse</th><th>What you combine</th><th>Your file</th></tr>
+    <tr><td><strong>Early</strong></td><td>at the <strong>input</strong></td><td>raw RGB + raw LiDAR-as-depth → 4-channel image</td><td><code>fusion/early_2d/model.py</code></td></tr>
+    <tr><td><strong>Mid</strong></td><td>at the <strong>features</strong></td><td>camera feature map + LiDAR feature map</td><td><code>fusion/mid_2d/model.py</code></td></tr>
+    <tr><td><strong>Late</strong></td><td>at the <strong>decision</strong></td><td>two separate sets of detections</td><td><code>fusion/late_2d/model.py</code></td></tr>
+  </table>
+
+  <h3>Early fusion (data-level) — early_2d/model.py:26–41</h3>
+  <pre><code>d = render_depth_torch(pts, calib, H, W, ...)   # LiDAR -&gt; (H,W) depth
+d = (d / 80.0).clamp(0, 1)                      # normalize to [0,1]
+x = torch.cat([imgs, depth], dim=1)            # (B,4,H,W): RGB + depth
+feat = self.backbone(x)[stride]                # first conv takes 4 channels</code></pre>
+  <ul>
+    <li><strong>What's fused:</strong> the raw signals, before any learning. The network sees a 4th channel.</li>
+    <li><strong>Why simple:</strong> the depth rendering is preprocessing, so the network is just a 4-channel detector — clean to export. At deploy you do the depth render in C++/CUDA and feed a 4-channel tensor.</li>
+    <li><strong>Weakness:</strong> the network has to learn to use a depth channel from scratch, and a sparse depth map wastes most of that channel as zeros.</li>
+  </ul>
+
+  <h3>Mid fusion (feature-level) — mid_2d/model.py:32–46 — the modern sweet spot</h3>
+  <pre><code>f_cam = self.image_backbone(img)[stride]                  # (B,C,Hg,Wg)
+f_lid = self.lidar_encoder(points, calib, H, W, device)    # (B,Cl,Hg,Wg) ALIGNED to cam grid
+fused = self.fuse(torch.cat([f_cam, f_lid], dim=1))        # concat + 1x1 conv
+return self.head(fused)</code></pre>
+  <ul>
+    <li><strong>What's fused:</strong> each sensor is <em>encoded into features first</em>, then the feature maps are concatenated and mixed with a 1×1 conv.</li>
+    <li><strong>The critical word — ALIGNED:</strong> the LiDAR encoder projects points to the <em>camera feature grid</em> (same stride, same Hg×Wg cells), so cell (i,j) in <code>f_cam</code> and cell (i,j) in <code>f_lid</code> describe the <strong>same physical region</strong>. Without alignment, concatenation is meaningless.</li>
+    <li><strong>The PointNet atom:</strong> per-point MLP → max-pool per cell (<code>scatter_reduce_</code> with <code>amax</code>). Max-pool is permutation-invariant and handles variable point counts per cell — that's why PointNet-style encoders work on unordered point sets.</li>
+    <li><strong>Why it's the sweet spot:</strong> each sensor gets a learned representation, fusion is cheap (one conv), and it usually beats early/late. Likely your deploy winner.</li>
+    <li><strong>Deploy note:</strong> the LiDAR scatter is awkward to export to ONNX, so you export the net to take a <em>pre-scattered</em> LiDAR feature map and do the scatter in C++/CUDA at deploy.</li>
+  </ul>
+
+  <h3>Late fusion (decision-level) — late_2d/model.py:34–87</h3>
+  <pre><code>cam_pred = self.cam_head(self.cam_backbone(img)[stride])      # detector A on RGB
+lid_pred = self.lid_head(self.lid_backbone(lid_img)[stride])  # detector B on LiDAR-as-image
+# decode -&gt; merge by IoU association -&gt; fuse conf (mean or max) -&gt; NMS</code></pre>
+  <ul>
+    <li><strong>What's fused:</strong> the <em>outputs</em> — two independent detectors each produce boxes, then you merge them.</li>
+    <li><strong>The merge (<code>_merge</code>, lines 61–87):</strong> match camera boxes to LiDAR boxes by <strong>IoU</strong> (geometric association), fuse confidences (mean or max), then <strong>NMS</strong> the combined list.</li>
+    <li><strong>Training (<code>loss</code>, lines 50–51):</strong> sum of <em>both</em> detectors' losses against the <em>same</em> GT, each sees the same ground truth. <code>custom_loss=True</code> so the trainer knows not to apply the standard loss path.</li>
+    <li><strong>Cost:</strong> needs <strong>two engines + a C++ merge/NMS</strong> at deploy — heavier than mid.</li>
+    <li><strong>Strength:</strong> most robust by design (each sensor has its own detector, so one failing doesn't kill the pipeline), and easiest to reason about.</li>
+  </ul>
+
+  <blockquote><strong>The one-line mental model:</strong> <strong>Early</strong> fuses data, <strong>mid</strong> fuses features, <strong>late</strong> fuses decisions. The later you fuse, the more independent the sensors and the more robust you are, but the less the sensors can <em>help each other learn</em>. The earlier you fuse, the more the network can jointly exploit both signals, but the harder the learning and the export.</blockquote>
+
+  <!-- 4 -->
+  <h2 id="s4">4 · Robustness — the real reason fusion beats single-sensor <span class="section-tag">→ fusion/base.py:32–37</span></h2>
+  <p>This is what turns "I fused two sensors" into "I can <em>prove</em> fusion helps."</p>
+  <p>Every variant has blind-mode hooks:</p>
+  <pre><code>def set_cam_blind(self, flag=True): self._cam_blind = flag
+def set_lidar_blind(self, flag=True): self._lidar_blind = flag</code></pre>
+  <p>When blind, the branch is <em>zeroed but the forward pass still runs</em> (see <code>mid_2d/model.py:35–41</code>). So you can measure <strong>AP with both sensors</strong>, then <strong>AP with camera dropped</strong>, then <strong>AP with LiDAR dropped</strong>. A good fused model should:</p>
+  <ul>
+    <li>beat both single-sensor baselines with both sensors present (fusion gain), <strong>and</strong></li>
+    <li>when one sensor is dropped, degrade gracefully — not collapse to zero.</li>
+  </ul>
+  <p>The robustness sweep lives in <code>eval/robustness.py</code>. This single experiment is the most interview-impressive part of the project: most candidates show accuracy; you show <em>graceful degradation under sensor failure</em>, which is exactly what safety-critical perception roles ask for.</p>
+
+  <!-- 5 -->
+  <h2 id="s5">5 · BEV &amp; 3D fusion <span class="section-tag">→ fusion/fusion_3d/model.py + common/geometry/bev.py</span></h2>
+  <p>The 2D variants detect boxes in the image. The 3D variant detects boxes in the world <code>(x, y, z, w, h, l, yaw)</code> — the canonical automotive approach.</p>
+
+  <h3>Why BEV (bird's-eye view)?</h3>
+  <p>Detecting in the image plane is bad for driving because perspective distorts distances (close objects are huge, far ones tiny) and objects overlap. BEV is a <strong>top-down grid</strong> where one cell = one patch of ground; distances and sizes are physically uniform. It's the natural space for 3D detection.</p>
+
+  <h3>Your BEV convention (bev.py:1–6)</h3>
+  <pre><code>cam frame: x right, y down, z forward
+BEV grid: dim0 (r) = z (forward), dim1 (c) = x (right), centered at ego
+z = -range + (r+0.5)*res,  x = -range + (c+0.5)*res</code></pre>
+  <p>So a point's BEV cell is found from its <strong>x</strong> (→column) and <strong>z</strong> (→row); <strong>y</strong> (height) is the thing you encode <em>inside</em> the cell, not where the cell is. That's why it's called "bird's-eye" — you collapse height into the cell's features.</p>
+
+  <h3>The two branches (both build a BEV feature map, then fuse in BEV)</h3>
+  <h4>Camera branch — simplified lift-splat-shoot (fusion_3d/model.py:48–79)</h4>
+  <ol>
+    <li>Image backbone → per-pixel features.</li>
+    <li><code>depth_head</code> predicts a <strong>depth distribution</strong> over K bins for every pixel.</li>
+    <li>Back-project each pixel at each candidate depth to 3D: <code>x=(u-cx)*d/fx, y=(v-cy)*d/fy, z=d</code>.</li>
+    <li>Map to BEV cells, weight each contribution by its softmax depth probability, and <strong>scatter-add</strong> into the BEV grid (the <code>scatter_add_</code> at line 77 is the "splat").</li>
+  </ol>
+  <p>Result: <code>BEV_cam</code> — the camera's view lifted into the top-down world.</p>
+
+  <h4>LiDAR branch — simplified PointPillars (lidar_encoder.py:70–108)</h4>
+  <ol>
+    <li>Convert points to cam frame.</li>
+    <li>Assign each point to a BEV cell ("pillar").</li>
+    <li>Per-point MLP on <code>[x,y,z,intensity, dx,dz]</code> (point coords + cell-relative offsets).</li>
+    <li><strong>Max-pool per cell</strong> → <code>BEV_lid</code>, a top-down pseudo-image.</li>
+  </ol>
+
+  <h4>Fusion + head (fusion_3d/model.py:96–97)</h4>
+  <pre><code>fused = self.fuse(torch.cat([bev_cam, bev_lid], dim=1))   # concat in BEV + 1x1 conv
+return self.head(fused)                                   # CenterPoint 3D head</code></pre>
+  <p>Both branches speak the <em>same</em> BEV language, so concatenation is geometrically meaningful (same as mid-2D's alignment, but in BEV instead of the image grid).</p>
+
+  <blockquote><strong>Honesty note</strong> (already in your code, fusion_3d/model.py:8–13): your lift-splat is <strong>simplified</strong> (direct splat, no frustum pooling). For real 3D-AP numbers you reuse the KITTI devkit (<code>eval/metrics_3d.py</code>) — you do <em>not</em> trust this simplified pipeline for publication numbers, and you don't hand-write the CUDA scatter. That stated scope is what makes the project credible.</blockquote>
+
+  <!-- 6 -->
+  <h2 id="s6">6 · The deploy story <span class="section-tag">→ where your Jetson strength plugs in</span></h2>
+  <p>This is your standout new-grad signal — you can take a <em>fused</em> model to edge hardware, not just a single detector. Each variant has a different deploy shape:</p>
+  <table>
+    <tr><th>Variant</th><th>Export</th><th>C++ preprocess</th><th>Engines</th></tr>
+    <tr><td>Early</td><td>4-channel detector</td><td>render LiDAR→depth in C++/CUDA</td><td>1</td></tr>
+    <tr><td>Mid</td><td>net takes pre-scattered LiDAR feat map</td><td>scatter points→grid in C++/CUDA</td><td>1</td></tr>
+    <tr><td>Late</td><td>two backbones</td><td>merge boxes + NMS in C++</td><td><strong>2</strong></td></tr>
+    <tr><td>3D</td><td>only BEV-fuse + head</td><td>lift-splat &amp; pillarize in C++/CUDA (v2)</td><td>1</td></tr>
+  </table>
+  <p>The pattern across all of them: <strong>the messy geometry (projection, scatter, splat) is moved out of the network into C++/CUDA preprocessing</strong>, so the exported ONNX is a clean feature→boxes net you can run through TensorRT — exactly the toolchain you already own from P7/QAT. Mid-2D is the likely deploy winner (one engine, clean export, best accuracy).</p>
+
+  <!-- 7 -->
+  <h2 id="s7">7 · Interview quick-reference <span class="section-tag">memorize these seven</span></h2>
+  <ol>
+    <li><strong>Frames:</strong> velo →(<code>V2C</code>)→ cam unrect →(<code>R0</code>)→ cam rect →(<code>P2</code>)→ image. Convention x-right, y-down, z-forward.</li>
+    <li><strong>Projection:</strong> matrix multiply then <strong>perspective divide</strong> by depth; depth survives as the Z coordinate.</li>
+    <li><strong>Early/mid/late</strong> = fuse at <strong>input / features / decisions</strong>. Trade: joint-learning vs robustness vs export cost.</li>
+    <li><strong>Mid needs alignment:</strong> LiDAR features must land on the <em>same grid cells</em> as camera features before concat.</li>
+    <li><strong>PointNet atom:</strong> per-point MLP + max-pool = permutation-invariant, handles variable points per cell.</li>
+    <li><strong>BEV:</strong> top-down grid, cell = (x,z), height y goes <em>inside</em> the cell. Both branches must speak BEV to fuse there.</li>
+    <li><strong>Robustness:</strong> blind-mode sweeps prove graceful degradation — the <em>real</em> argument for fusion, not just higher AP.</li>
+  </ol>
+
+  <hr>
+
+  <!-- SELF-TEST -->
+  <h2 id="selftest">★ Self-Test <span class="section-tag">answer without revealing — re-take in 3 days, then in a week</span></h2>
+  <div class="test-controls">
+    <button class="reveal" onclick="revealAll(true)">Reveal all answers</button>
+    <button class="reveal" onclick="revealAll(false)">Hide all answers</button>
+  </div>
+
+  <h3>A · Concepts</h3>
+
+  <div class="q"><div class="qlabel">Q1</div><div class="qtext">Name the three coordinate frames your code uses and the matrix chain that connects them.</div>
+    <button class="reveal" onclick="toggle(this)">Show answer</button>
+    <div class="ans"><strong>velo (LiDAR) → cam unrect → cam rect → image.</strong> Chain: <code>R0 @ V2C</code> brings velo into the rectified cam frame, then <code>P2</code> projects to pixels. Convention: x right, y down, z forward.</div></div>
+
+  <div class="q"><div class="qlabel">Q2</div><div class="qtext">What is the "perspective divide" and why does depth survive as a separate value after projection?</div>
+    <button class="reveal" onclick="toggle(this)">Show answer</button>
+    <div class="ans"><strong>Perspective divide</strong> = dividing <code>(X', Y', Z')</code> by <code>Z'</code> (depth) to get pixel <code>(u,v)</code>. Depth survives because it <em>is</em> the <code>Z'</code> coordinate you divided by — projection doesn't destroy it, it uses it as the divisor.</div></div>
+
+  <div class="q"><div class="qlabel">Q3</div><div class="qtext">In one sentence each: what does early, mid, and late fusion actually combine?</div>
+    <button class="reveal" onclick="toggle(this)">Show answer</button>
+    <div class="ans"><strong>Early</strong> combines raw RGB + raw LiDAR-as-depth (4-channel input). <strong>Mid</strong> combines learned camera features + learned LiDAR features. <strong>Late</strong> combines two independent sets of detections/boxes.</div></div>
+
+  <div class="q"><div class="qlabel">Q4</div><div class="qtext">Why must the LiDAR feature map be aligned to the camera feature grid in mid fusion? What breaks if it isn't?</div>
+    <button class="reveal" onclick="toggle(this)">Show answer</button>
+    <div class="ans">Concatenation only makes sense if channel (i,j) of both maps describes the <strong>same physical region</strong>. If unaligned, you'd be mixing "what the camera saw here" with "what LiDAR saw <em>somewhere else</em>" — the conv has no meaningful correspondence to learn.</div></div>
+
+  <div class="q"><div class="qlabel">Q5</div><div class="qtext">Why does the late-fusion model set <code>custom_loss = True</code>? What would go wrong if the trainer applied the standard single-output loss?</div>
+    <button class="reveal" onclick="toggle(this)">Show answer</button>
+    <div class="ans">Late fusion has <strong>two</strong> heads (cam + lid), each producing its own prediction against the <em>same</em> GT. The loss is the <strong>sum of both</strong> detectors' losses. If the trainer applied the standard single-output loss path, it wouldn't know how to handle a dict <code>{"cam":…, "lid":…}</code> of predictions.</div></div>
+
+  <div class="q"><div class="qlabel">Q6</div><div class="qtext">Late fusion merges two detection sets. Name the three steps your <code>_merge</code> does, in order.</div>
+    <button class="reveal" onclick="toggle(this)">Show answer</button>
+    <div class="ans"><strong>(a)</strong> compute IoU between camera and LiDAR boxes, <strong>(b)</strong> associate matches above the IoU threshold and fuse their confidences (mean or max), <strong>(c)</strong> NMS the merged list.</div></div>
+
+  <div class="q"><div class="qlabel">Q7</div><div class="qtext">Why does <code>render_depth_torch</code> sort points far-first before writing to the image?</div>
+    <button class="reveal" onclick="toggle(this)">Show answer</button>
+    <div class="ans">Multiple points can land on the same pixel. Sorting <strong>far-first</strong> means the <strong>nearest</strong> point is written last and overwrites — so the depth map holds the closest surface, which is the physically correct "what's there."</div></div>
+
+  <div class="q"><div class="qlabel">Q8</div><div class="qtext">What does <code>set_cam_blind(True)</code> actually do at runtime, and why is the forward pass not skipped?</div>
+    <button class="reveal" onclick="toggle(this)">Show answer</button>
+    <div class="ans">It <strong>zeros</strong> the camera branch's input/features but the forward pass still runs (so the LiDAR branch and the head still produce output). This lets you measure AP with one sensor <em>removed</em> — graceful degradation — rather than just crashing.</div></div>
+
+  <div class="q"><div class="qlabel">Q9</div><div class="qtext">What two things must a good fused model demonstrate in the robustness sweep (not just one)?</div>
+    <button class="reveal" onclick="toggle(this)">Show answer</button>
+    <div class="ans"><strong>(a) Fusion gain:</strong> beat both single-sensor baselines with both sensors present. <strong>(b) Graceful degradation:</strong> when one sensor is dropped, AP stays reasonable instead of collapsing.</div></div>
+
+  <h3>B · BEV / 3D</h3>
+
+  <div class="q"><div class="qlabel">Q10</div><div class="qtext">In your BEV convention, which two of (x, y, z) determine a point's cell, and what happens to the third?</div>
+    <button class="reveal" onclick="toggle(this)">Show answer</button>
+    <div class="ans"><strong>x</strong> (→column c) and <strong>z</strong> (→row r) determine the cell; <strong>y</strong> (height) is encoded <em>inside</em> the cell as a feature (height channel, or per-point MLP input), not as a cell coordinate.</div></div>
+
+  <div class="q"><div class="qlabel">Q11</div><div class="qtext">A camera pixel alone cannot become a 3D point. How does the camera branch of fusion-3D get around this? Name the mechanism.</div>
+    <button class="reveal" onclick="toggle(this)">Show answer</button>
+    <div class="ans">Back-projection needs a depth, which a pixel lacks. The camera branch <strong>predicts a per-pixel depth distribution</strong> (<code>depth_head</code> → softmax over K bins) and back-projects each pixel at each candidate depth, weighting by the predicted probability.</div></div>
+
+  <div class="q"><div class="qlabel">Q12</div><div class="qtext">Why detect in BEV rather than the image plane for driving? Give two reasons.</div>
+    <button class="reveal" onclick="toggle(this)">Show answer</button>
+    <div class="ans"><strong>(a)</strong> Perspective distorts sizes/distances in the image, making 3D box regression hard. <strong>(b)</strong> Objects occlude/overlap in the image but are separated in top-down BEV, so association and distance estimation are cleaner.</div></div>
+
+  <div class="q"><div class="qlabel">Q13</div><div class="qtext">Both branches of fusion-3D produce a BEV feature map. Why is concatenating those meaningful, but concatenating camera-image-features with raw LiDAR points would not be?</div>
+    <button class="reveal" onclick="toggle(this)">Show answer</button>
+    <div class="ans">Both BEV maps share the <strong>same coordinate system and grid</strong>, so cell (i,j) in each refers to the same patch of ground → concat is meaningful. Camera image features live in the image plane (pixels) while raw LiDAR points live in 3D — different spaces, no cell correspondence, so concat would be geometrically meaningless.</div></div>
+
+  <h3>C · Deploy / scope honesty</h3>
+
+  <div class="q"><div class="qlabel">Q14</div><div class="qtext">For each variant, say how many ONNX engines you export and what moves to C++/CUDA preprocessing.</div>
+    <button class="reveal" onclick="toggle(this)">Show answer</button>
+    <div class="ans"><strong>Early:</strong> 1 engine (4-channel detector); depth render in C++. <strong>Mid:</strong> 1 engine (takes pre-scattered LiDAR feat map); point scatter in C++. <strong>Late:</strong> 2 engines + a C++ merge/NMS. <strong>3D:</strong> 1 engine (BEV fuse+head only); lift-splat &amp; pillarize in C++ (v2).</div></div>
+
+  <div class="q"><div class="qlabel">Q15</div><div class="qtext">Why does your README/guide say the lift-splat in this repo is "simplified" and that 3D-AP should use the KITTI devkit rather than this pipeline? What would be dishonest about claiming otherwise?</div>
+    <button class="reveal" onclick="toggle(this)">Show answer</button>
+    <div class="ans">The lift-splat here is a simplified direct-splat without frustum pooling, not a faithful LSS. Claiming publication-grade 3D-AP from it would overstate what was built. The honest move: reuse the KITTI devkit/reference 3D-AP eval for real numbers and <em>state</em> that this branch is for understanding the data flow, not for final metrics.</div></div>
+
+  <div class="q"><div class="qlabel">Q16</div><div class="qtext">Why is mid-2D the likely deploy winner over late-2D, even if late is more robust?</div>
+    <button class="reveal" onclick="toggle(this)">Show answer</button>
+    <div class="ans">Late needs <strong>two engines + a C++ merge/NMS</strong> — more latency, memory, and deploy complexity on edge hardware. Mid is one clean engine with the scatter pushed to C++ preprocess, better accuracy-per-cost — even though late's independence is theoretically more robust, that robustness usually isn't worth the edge cost.</div></div>
+
+  <h3>D · "Explain it to me like a reviewer" (say it out loud)</h3>
+
+  <div class="q"><div class="qlabel">Q17</div><div class="qtext">"Walk me through what happens to one LiDAR point from the moment it enters mid-2D until it contributes to a box."</div>
+    <button class="reveal" onclick="toggle(this)">Show answer</button>
+    <div class="ans">Point (velo frame) → <code>R0 @ V2C</code> to cam frame → project to image pixel + depth (perspective divide) → divide by stride to get a camera-grid <strong>cell</strong> → feed point + intensity into a per-point <strong>MLP</strong> → <strong>max-pool</strong> all points in that cell (scatter-reduce amax) → that's <code>f_lid</code>, aligned to the camera grid → <strong>concat</strong> with <code>f_cam</code> → <strong>1×1 conv</strong> fuses → <strong>CenterHead2D</strong> predicts heat/offset/size → decode to boxes.</div></div>
+
+  <div class="q"><div class="qlabel">Q18</div><div class="qtext">"Your project holds backbones and data fixed. Why is that the whole point?"</div>
+    <button class="reveal" onclick="toggle(this)">Show answer</button>
+    <div class="ans">If backbones/data/epochs differ, any AP difference could be from the backbone or data, not the fusion. Holding everything fixed means <strong>the only variable is the fusion strategy</strong>, so "fusion gain = variant AP − baseline" is a clean, attributable measurement. That's what makes it a benchmark.</div></div>
+
+  <div class="q"><div class="qlabel">Q19</div><div class="qtext">"When would you not want fusion?"</div>
+    <button class="reveal" onclick="toggle(this)">Show answer</button>
+    <div class="ans">When the second sensor is unreliable or degenerate (adds noise with no information gain); when latency/power/memory budget can't afford a second branch; or when the task doesn't benefit from the other modality (e.g. pure 2D texture classification needs no LiDAR). Fusion has a real cost — only worth it when the upside in accuracy/robustness exceeds it.</div></div>
+
+  <footer>
+    <p>Learning Fusion · generated from your <code>fusion/</code> repo · pair with <code>LEARNING_FUSION.md</code>.<br>
+    Re-test in 3 days, then in a week — spaced repetition is what makes it stick.</p>
+  </footer>
+
+</div>
+
+<script>
+  function toggle(btn){
+    const ans = btn.nextElementSibling;
+    const show = !ans.classList.contains('show');
+    ans.classList.toggle('show', show);
+    btn.textContent = show ? 'Hide answer' : 'Show answer';
+  }
+  function revealAll(show){
+    document.querySelectorAll('.ans').forEach(a => a.classList.toggle('show', show));
+    document.querySelectorAll('.q button.reveal').forEach(b => b.textContent = show ? 'Hide answer' : 'Show answer');
+  }
+</script>
+
+</body>
+</html>
