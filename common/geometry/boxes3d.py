@@ -38,7 +38,7 @@ def encode_boxes3d(boxes, labels, Hg, Wg, res, range_m, num_classes, device, min
     for i in range(boxes.shape[0]):
         # gaussian radius from BEV footprint (l x w)
         rad = gaussian_radius(max(h[i].item(), 1.0), max(l[i].item(), 1.0), min_overlap)
-        _draw_gaussian(heat[labels[i]], (r[i].item(), c[i].item()), rad)
+        _draw_gaussian(heat[int(labels[i])], (r[i].item(), c[i].item()), rad)
     off[0, r, c] = off_z; off[1, r, c] = off_x
     height[0, r, c] = y
     size[0, r, c] = w; size[1, r, c] = h; size[2, r, c] = l

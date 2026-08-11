@@ -66,7 +66,7 @@ def encode_boxes2d(boxes, labels, Hg, Wg, stride, num_classes, device, min_overl
     off_x = (cx / stride) - gcx.float()
     for i in range(boxes.shape[0]):
         r = gaussian_radius(h[i].item(), w[i].item(), min_overlap)
-        _draw_gaussian(heat[labels[i]], (gcy[i].item(), gcx[i].item()), r)
+        _draw_gaussian(heat[int(labels[i])], (gcy[i].item(), gcx[i].item()), r)
     # last writer for off/size at each cell (fine for non-overlapping centers)
     off[0, gcy, gcx] = off_y
     off[1, gcy, gcx] = off_x

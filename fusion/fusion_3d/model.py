@@ -37,7 +37,8 @@ class Fusion3D(FusionModel):
         self.K = cfg.get("lift", {}).get("depth_bins", 16)
         self.depth_max = cfg.get("lift", {}).get("depth_max_m", 40.0)
 
-        self.image_backbone = ImageBackbone(in_channels=3, out_channels=cfg["fusion_channels"])
+        self.image_backbone = ImageBackbone(in_channels=3, out_channels=cfg["fusion_channels"],
+                                            pretrained=cfg.get("pretrained_backbone", False))
         self.depth_head = nn.Conv2d(cfg["fusion_channels"], self.K, 1)
         self.cam_reduce = nn.Conv2d(cfg["fusion_channels"], CAM_BEV, 1)
         self.lidar_encoder = PillarBEVEncoder(out_channels=LID_BEV)

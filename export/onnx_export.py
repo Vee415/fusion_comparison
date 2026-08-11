@@ -23,9 +23,14 @@ def export_variant(name, base_cfg, out_dir="onnx"):
     if base_cfg.get("dataset"): cfg["dataset"] = base_cfg["dataset"]
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = build_model(cfg).to(device).eval()
-    ckpt = os.path.join("checkpoints", f"{name}.pt")
+    best_ckpt = os.path.join("checkpoints", f"{name}_best.pt")
+    final_ckpt = os.path.join("checkpoints", f"{name}.pt")
+    ckpt = best_ckpt if os.path.exists(best_ckpt) else final_ckpt
     if os.path.exists(ckpt):
-        model.load_state_dict(torch.load(ckpt, map_location=device)["model"])
+        model.load_state_dict(torch.load(ckpt, map_location=device, weights_only=False)["model"])
+        print(f"[{name}] loaded {ckpt}")
+    else:
+        print(f"[{name}] [warn] no checkpoint; using untrained weights")
     os.makedirs(out_dir, exist_ok=True)
     path = os.path.join(out_dir, f"{name}.onnx")
     out = model.export_onnx(path, cfg, device)

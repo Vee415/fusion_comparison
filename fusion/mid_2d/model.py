@@ -24,7 +24,8 @@ class MidFusion2D(FusionModel):
         self.stride = cfg["stride"]
         H, W = cfg["image_size"]
         self.H, self.W = H, W
-        self.image_backbone = ImageBackbone(in_channels=3, out_channels=cfg["fusion_channels"])
+        self.image_backbone = ImageBackbone(in_channels=3, out_channels=cfg["fusion_channels"],
+                                            pretrained=cfg.get("pretrained_backbone", False))
         self.lidar_encoder = LidarImageGridEncoder(out_channels=cfg["lidar_feat_channels"], stride=self.stride)
         self.fuse = nn.Conv2d(cfg["fusion_channels"] + cfg["lidar_feat_channels"], cfg["fusion_channels"], 1)
         self.head = CenterHead2D(cfg["fusion_channels"], num_classes=cfg["num_classes"])

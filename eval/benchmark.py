@@ -46,9 +46,13 @@ def run_variant(name, base_cfg, device, val_length=16, iters=None):
     cfg = load_config(cfg_path)
     if base_cfg.get("dataset"): cfg["dataset"] = base_cfg["dataset"]
     model = build_model(cfg).to(device)
-    ckpt = os.path.join("checkpoints", f"{name}.pt")
+    # prefer best checkpoint (lowest val loss), fall back to final
+    best_ckpt = os.path.join("checkpoints", f"{name}_best.pt")
+    final_ckpt = os.path.join("checkpoints", f"{name}.pt")
+    ckpt = best_ckpt if os.path.exists(best_ckpt) else final_ckpt
     if os.path.exists(ckpt):
-        model.load_state_dict(torch.load(ckpt, map_location=device)["model"])
+        model.load_state_dict(torch.load(ckpt, map_location=device, weights_only=False)["model"])
+        print(f"  loaded {ckpt}")
     else:
         print(f"  [warn] no checkpoint for {name}; using untrained weights (smoke test)")
     loader = build_loader(cfg, "val" if cfg["dataset"] == "synthetic" else "train", length=val_length)

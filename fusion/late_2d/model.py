@@ -26,8 +26,9 @@ class LateFusion2D(FusionModel):
         self.cfg = cfg
         self.stride = cfg["stride"]
         self.custom_loss = True
-        self.cam_backbone = ImageBackbone(in_channels=3, out_channels=cfg["fusion_channels"])
-        self.lid_backbone = ImageBackbone(in_channels=3, out_channels=cfg["fusion_channels"])
+        pt = cfg.get("pretrained_backbone", False)
+        self.cam_backbone = ImageBackbone(in_channels=3, out_channels=cfg["fusion_channels"], pretrained=pt)
+        self.lid_backbone = ImageBackbone(in_channels=3, out_channels=cfg["fusion_channels"], pretrained=pt)
         self.cam_head = CenterHead2D(cfg["fusion_channels"], num_classes=cfg["num_classes"])
         self.lid_head = CenterHead2D(cfg["fusion_channels"], num_classes=cfg["num_classes"])
 
@@ -87,9 +88,26 @@ class LateFusion2D(FusionModel):
         return {"boxes": boxes[keep], "scores": scores[keep], "labels": labels[keep]}
 
     def export_onnx(self, path, cfg, device):
-        B = 1; H, W = cfg["image_size"]
+        B = 1; H, W = cfg["image_size"]; s = self.stride
         img = torch.zeros((B, 3, H, W), device=device)
         base = path[:-5] if path.endswith(".onnx") else path
-        torch.onnx.export(self.cam_backbone, img, f"{base}_cam.onnx", opset_version=17)
-        torch.onnx.export(self.lid_backbone, img, f"{base}_lid.onnx", opset_version=17)
+
+        class _CamNet(nn.Module):
+            def __init__(s_): super().__init__(); s_.backbone = self.cam_backbone; s_.head = self.cam_head
+            def forward(s_, x):
+                return s_.head(s_.backbone(x)[str(s)])
+
+        class _LidNet(nn.Module):
+            def __init__(s_): super().__init__(); s_.backbone = self.lid_backbone; s_.head = self.lid_head
+            def forward(s_, x):
+                return s_.head(s_.backbone(x)[str(s)])
+
+        cam_net = _CamNet().eval()
+        lid_net = _LidNet().eval()
+        torch.onnx.export(cam_net, img, f"{base}_cam.onnx",
+                          input_names=["image"], output_names=["heat", "off", "size"],
+                          dynamic_axes={"image": {0: "B"}}, opset_version=17)
+        torch.onnx.export(lid_net, img, f"{base}_lid.onnx",
+                          input_names=["lidar_image"], output_names=["heat", "off", "size"],
+                          dynamic_axes={"lidar_image": {0: "B"}}, opset_version=17)
         return f"{base}_cam.onnx (+{base}_lid.onnx)"

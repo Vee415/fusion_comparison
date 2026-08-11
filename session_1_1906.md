@@ -6,8 +6,8 @@ all four fusion variants implemented and runnable end-to-end on synthetic data.
 ## What we did this session
 
 ### 1. Guide rewrite
-Rewrote `../fusion-benchmark-guide.md` from an aspirational senior delivery plan
-into a new-grad-scoped learning roadmap:
+Rewrote `fusion-benchmark-guide.md` (now at repo root) from an aspirational
+senior delivery plan into a new-grad-scoped learning roadmap:
 - Removed all `§` symbols (`§N` → `Section N`).
 - Kept all 3 two-dimensional fusion modes (early / mid / late) + the 3D BEV variant intact.
 - Added a build-vs-study-vs-defer honesty table (Section 1) — what to build yourself
@@ -17,9 +17,9 @@ into a new-grad-scoped learning roadmap:
   framed as the missing temporal/state-estimation piece for drone perception.
 
 ### 2. Full implementation (6 dependency-ordered layers)
-Everything under `fusion-benchmark/`. Runnable WITHOUT KITTI via a synthetic loader,
-so the whole pipeline (train / eval / export / benchmark) can be verified before
-downloading 12 GB of data.
+All packages sit directly at the repo root (`common/`, `fusion/`, `train/`, etc.).
+Runnable WITHOUT KITTI via a synthetic loader, so the whole pipeline
+(train / eval / export / benchmark) can be verified before downloading 12 GB of data.
 
 - `requirements.txt`, `README.md` (synthetic smoke + real-KITTI flow + coordinate
   convention + scope honesty), `.gitignore`.
@@ -71,6 +71,17 @@ bev_lid cast to bev_cam dtype); late_2d malformed walrus line removed.
   late_2d ~47ms on RTX 4060). AP = 0.000 on synthetic is expected (random noise,
   untrained / 1-epoch).
 
+### 6. Git repo + restructure (end of session)
+- Initialized git at `fusion-benchmark\`, baseline commit `e1a7157` (57 source
+  files; no co-author line per user request).
+- Then restructured: moved the repo root up one level to `fusion\` so the guide
+  lives alongside the code. `.git` + all source moved up by the same amount, so
+  tracked paths stayed identical relative to the root — git recorded the move as
+  zero changes. Second commit `70ee3ca` just adds the guide.
+- Final repo root: `C:\Users\varun\projects\fusion\`. The `fusion-benchmark\`
+  wrapper folder is gone. Gitignored artifacts (`.pytest_cache`,
+  `benchmark_results.csv`, `checkpoints/`) came along but stay untracked.
+
 ## What to do next session
 
 ### Immediate (verify on real data)
@@ -100,11 +111,13 @@ bev_lid cast to bev_cam dtype); late_2d malformed walrus line removed.
       only fuse + head (lift-splat / pillarize are CUDA preprocess).
 
 ### Open / offered but not confirmed
-- [ ] Git repo + baseline commit (offered end of session, not yet done — user was
-      focused on understanding the tests / context settings). Confirm before
-      starting to change things so there's a clean versioned starting point.
+- (none — the git repo + baseline commit offer was accepted and completed; see
+  section 6. Working tree is clean at HEAD `70ee3ca`.)
 
 ### Carry-over notes
+- **Repo root is now `C:\Users\varun\projects\fusion\`.** Run all commands from
+  there (e.g. `python -m train.trainer --config config/mid_2d.yaml ...`), not
+  from the old `fusion-benchmark\` folder, which no longer exists.
 - `lr_scheduler "step before optimizer.step"` warning in trainer — benign, not fixed.
 - Simplified lift-splat (fusion_3d) is for learning, not publication numbers; for
   real 3D-AP reuse the KITTI devkit via `eval/metrics_3d.py::evaluate_official`.

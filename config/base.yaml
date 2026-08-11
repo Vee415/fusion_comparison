@@ -1,7 +1,7 @@
 # Shared across all variants. Only fusion-specific deltas go in the variant yamls.
 seed: 0
 dataset: kitti            # kitti | synthetic
-data_root: data/kitti
+data_root: data/kitti/training
 image_size: [384, 1280]   # [H, W] — KITTI aspect
 num_classes: 1
 classes: ["Car"]
@@ -14,6 +14,8 @@ bev:
   res_m: 0.2              # cell size -> 320x320 grid (D shrinks this)
 
 backbone: resnet18        # shared
+pretrained_backbone: true # load ImageNet ResNet-18 weights (standard detection init)
+freeze_backbone_epochs: 0 # 0 = train everything from the start (pretrained backbone handles it)
 fusion_channels: 256      # shared fused-feature channel count
 lidar_feat_channels: 32   # mid-2D lidar image-grid feature dim
 pillar_feat_channels: 64  # 3D PointPillars per-pillar feature dim
@@ -22,12 +24,17 @@ pillar_feat_channels: 64  # 3D PointPillars per-pillar feature dim
 stride: 16                # 2D feature level (384/16=24, 1280/16=80)
 
 # Training
-epochs: 60
-batch_size: 2
-lr: 0.001
+epochs: 20              # model converges by ~epoch 15-18; nan-skip + val-inf protect best ckpt
+batch_size: 8             # RTX 4060 has 8GB; ResNet18+FPN uses ~1.4GB at bs=2, plenty of headroom
+lr: 0.0003              # was 0.001; lower LR lets focal loss sharpen the heatmap
 weight_decay: 0.0001
 amp: true
 workers: 2
+
+# Validation / early stopping
+val_fraction: 0.1        # hold out 10% of frames for validation (not trained on)
+early_stop_patience: 5   # stop if val loss hasn't improved for 5 consecutive epochs
+early_stop_min_delta: 0.0001
 
 # Robustness
 robustness:

@@ -20,7 +20,8 @@ class EarlyFusion2D(FusionModel):
         super().__init__(cfg)
         self.stride = cfg["stride"]
         extra = cfg.get("extra_input_channels", 1)
-        self.backbone = ImageBackbone(in_channels=3 + extra, out_channels=cfg["fusion_channels"])
+        self.backbone = ImageBackbone(in_channels=3 + extra, out_channels=cfg["fusion_channels"],
+                                      pretrained=cfg.get("pretrained_backbone", False))
         self.head = CenterHead2D(cfg["fusion_channels"], num_classes=cfg["num_classes"])
 
     def _build_input(self, batch, device):
