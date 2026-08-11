@@ -1,6 +1,7 @@
 # Data (12 GB KITTI + raw) -- never commit
 data/kitti/
 data/*.zip
+data/kitti_sample/*.zip
 *.bin
 *.kitti
 
@@ -27,3 +28,7 @@ venv/
 fusion*.md
 sess*.md
 .zcode/
+
+# Large binary artifacts (regenerable, not source)
+deploy/*.png
+notebooks/*.png
